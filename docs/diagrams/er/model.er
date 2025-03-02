@@ -1,0 +1,100 @@
+erDiagram
+
+  %% User Service
+  USER {
+    int id PK
+    string username "Уникальное имя пользователя"
+    string password_hash "Хэш пароля"
+    string email "Email пользователя"
+    string role "Роль пользователя"
+    datetime created_at "Дата регистрации"
+  }
+
+  SESSION {
+    int id PK
+    int user_id FK "Ссылка на пользователя"
+    string token "Уникальный токен сессии"
+    string ip_address "IP адрес устройства"
+    datetime created_at "Дата создания"
+    datetime expires_at "Дата истечения"
+  }
+
+  USER_PROFILE {
+    int user_id PK, FK "Ссылка на пользователя"
+    string full_name "Полное имя"
+    text bio "Биография"
+    string avatar_url "Аватар"
+    date birth_date "Дата рождения"
+    string location "Местоположение"
+  }
+
+  %% Post Service
+  POST {
+    int id PK
+    int user_id FK "Ссылка на автора"
+    text content "Текст поста"
+    datetime created_at "Дата создания"
+    datetime updated_at "Дата обновления"
+    boolean is_deleted "Флаг удаления"
+  }
+
+  COMMENT {
+    int id PK
+    int post_id FK "Ссылка на пост"
+    int parent_comment_id FK "Ответ на комментарий"
+    int user_id FK "Ссылка на автора"
+    text content "Текст комментария"
+    datetime created_at "Дата создания"
+    datetime updated_at "Дата обновления"
+    boolean is_deleted "Флаг удаления"
+  }
+
+  LIKE {
+    int id PK
+    int post_id FK "Ссылка на пост"
+    int comment_id FK "Ссылка на комментарий"
+    int user_id FK "Ссылка на пользователя, поставившего лайк"
+    datetime created_at "Дата, когда лайк был поставлен"
+    boolean is_deleted "Флаг удаления"
+  }
+
+  %% Statistics Service
+  POST_STATISTICS {
+    int post_id PK, FK "Ссылка на пост"
+    int views "Количество просмотров"
+    int likes "Количество лайков"
+    int comments "Количество комментариев"
+    datetime last_updated "Дата обновления"
+  }
+
+  COMMENT_STATISTICS {
+    int comment_id PK, FK "Ссылка на комментарий"
+    int views "Количество просмотров"
+    int likes "Количество лайков"
+    int comments "Количество комментариев"
+    datetime last_updated "Дата обновления"
+  }
+
+  USER_STATISTICS {
+    int user_id PK, FK "Ссылка на пользователя"
+    int total_posts "Общее количество постов"
+    int total_comments "Общее количество комментариев"
+    int total_likes_received "Общее количество лайков"
+    datetime last_activity "Дата последней активности"
+  }
+
+  %% Связи между таблицами
+  USER ||--o{ SESSION : "имеет"
+  USER ||--|{ USER_PROFILE : "имеет один"
+  USER ||--o{ POST : "создает"
+  USER ||--o{ COMMENT : "пишет"
+  USER ||--o{ LIKE : "ставит"
+  USER ||--|{ USER_STATISTICS : "имеет"
+
+  POST ||--o{ COMMENT : "содержит"
+  POST ||--o{ LIKE : "содержит"
+  POST ||--|{ POST_STATISTICS : "имеет"
+
+  COMMENT ||--o{ COMMENT : "может содержать"
+  COMMENT ||--o{ LIKE : "содержит"
+  COMMENT ||--|{ COMMENT_STATISTICS : "имеет"

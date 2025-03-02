@@ -1,0 +1,82 @@
+specification {
+    element person {
+        style {
+            shape person
+            color green
+        }
+    }
+    element softwareSystem
+    element container
+}
+
+model {
+  user = person "Пользователь" "Пользователь социальной сети (UI)"
+
+  network = softwareSystem "Социальная сеть" {
+    apiGateway = container "API Gateway" {
+      description "Маршрутизация запросов и управление доступом"
+    }
+
+    userService = container "User Service" {
+      description "Управление пользователями и аутентификация"
+    }
+
+    postsService = container "Posts and Commentaries Service" {
+      description "Управление постами и комментариями"
+    }
+
+    analyticsService = container "Analytics Service" {
+      description "Сбор и анализ статистики использования"
+    }
+
+    postgresDb = container "PostgreSQL" {
+      description "Хранение данных пользователей"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    clickhouseDb = container "Clickhouse" {
+      description "Хранение данных пользователей"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    cassandraDb = container "Cassandra" {
+      description "Хранение данных постов и комментариев"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    kafka = container "Kafka" {
+      description "Обмен событиями между сервисами"
+      technology "Message Broker"
+      style {
+        shape queue
+      }
+    }
+  }
+
+  user -> network.apiGateway "Использует" "HTTPS"
+  network.apiGateway -> network.userService "Маршрутизирует"
+  network.apiGateway -> network.postsService "Маршрутизирует"
+  network.apiGateway -> network.analyticsService "Маршрутизирует"
+
+  network.userService -> network.postgresDb "Читает/Пишет"
+  network.postsService -> network.cassandraDb "Читает/Пишет"
+  network.analyticsService -> network.clickhouseDb "Читает/Пишет"
+
+  network.postsService -> network.kafka "Публикует"
+  network.analyticsService -> network.kafka "Подписывается"
+}
+
+views {
+   view index {
+        include *
+    }
+}
