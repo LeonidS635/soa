@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: Social Network API
+  description: API социальной сети
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+    description: Локальный сервер разработки
+
+paths:
+  /signup:
+    post:
+      summary: Регистрация пользователя
+      description: Создаёт нового пользователя и возвращает JWT-токен в cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password, email]
+              properties:
+                username:
+                  type: string
+                  example: "john_doe"
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+      responses:
+        "201":
+          description: Успешная регистрация
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "jwt=jwt_token_here"
+        "400":
+          description: Ошибка валидации
+        "409":
+          description: Пользователь уже существует
+        "500":
+          description: Ошибка на стороне сервера
+
+  /signin:
+    post:
+      summary: Вход в систему
+      description: Аутентифицирует пользователя и возвращает JWT-токен в cookie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                  example: "john_doe"
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+      responses:
+        "200":
+          description: Успешный вход
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "token=jwt_token_here; HttpOnly; Secure"
+        "400":
+          description: Ошибка валидации
+        "403":
+          description: Неверные учетные данные
+        "500":
+          description: Ошибка на стороне сервера
+
+  /profile:
+    get:
+      summary: Получение профиля пользователя
+      description: Возвращает данные профиля пользователя
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Успешное получение профиля
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "John"
+                  surname:
+                    type: string
+                    example: "Doe"
+                  age:
+                    type: integer
+                    example: 30
+                  email:
+                    type: string
+                    format: email
+                    example: "john@example.com"
+                  phone:
+                    type: string
+                    format: phone
+                    example: "1 (234) 567-89-00"
+                  description:
+                    type: string
+                    example: "Software developer"
+                  city:
+                    type: string
+                    example: "New York"
+                  birthdate:
+                    type: string
+                    format: date
+                    example: "2006-01-02T15:04:05Z"
+        "400":
+          description: JWT-токен отсутствует или невалиден
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+    post:
+      summary: Обновление профиля пользователя
+      description: Позволяет пользователю обновить свои данные профиля
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John"
+                surname:
+                  type: string
+                  example: "Doe"
+                age:
+                  type: integer
+                  example: 30
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                phone:
+                  type: string
+                  format: phone
+                  example: "1 (234) 567-89-00"
+                description:
+                  type: string
+                  example: "Software developer"
+                city:
+                  type: string
+                  example: "New York"
+                birthdate:
+                  type: string
+                  format: date
+                  example: "2006-01-02T15:04:05Z"
+      responses:
+        "200":
+          description: Профиль успешно обновлён
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt

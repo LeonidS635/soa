@@ -1,1 +1,8 @@
 .idea
+
+# postgres volume
+pgdata
+
+# RSA signatures for JWT
+*.pem
+*.pub
