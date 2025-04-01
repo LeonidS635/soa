@@ -1,16 +1,29 @@
 services:
-  postgres:
+  postgres_users:
     image: postgres:17-alpine
     ports:
       - "5432:5432"
     restart: always
     volumes:
-      - ./pgdata:/var/lib/postgesql/data
+      - ./pgdata_users:/var/lib/postgesql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    container_name: postgres_db
+    container_name: users_postgres_db
+
+  postgres_posts:
+    image: postgres:17-alpine
+    ports:
+      - "6543:5432"
+    restart: always
+    volumes:
+      - ./pgdata_posts:/var/lib/postgesql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    container_name: posts_postgres_db
 
   swagger:
     image: swaggerapi/swagger-ui
@@ -23,13 +36,13 @@ services:
       - SWAGGER_JSON=/configs/openapi.yaml
     container_name: swagger_ui
 
-  api_gateway:
+  gateway:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: internal/services/gateway/Dockerfile
     ports:
       - "8081:8081"
-    container_name: api_gateway
+    container_name: gateway
 
   user_service:
     build:
@@ -38,3 +51,11 @@ services:
     ports:
       - "8082:8082"
     container_name: user_service
+
+  posts_service:
+    build:
+      context: .
+      dockerfile: internal/services/posts/Dockerfile
+    ports:
+      - "8083:8083"
+    container_name: posts_service

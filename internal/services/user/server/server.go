@@ -17,26 +17,10 @@ const (
 	jwtPrivateFile = "internal/services/user/server/signatures/signature.pem"
 	jwtPublicFile  = "internal/services/user/server/signatures/signature.pub"
 
-	connString = "postgres://postgres:postgres@postgres_db:5432/postgres?sslmode=disable"
+	connString = "postgres://postgres:postgres@users_postgres_db:5432/postgres?sslmode=disable"
 
 	port = 8082
 )
-
-//func enableCORS(h *http.ServeMux) http.Handler {
-//	return http.HandlerFunc(
-//		func(w http.ResponseWriter, r *http.Request) {
-//			w.Header().Set("Access-Control-Allow-Origin", "*")
-//			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-//			w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding")
-//
-//			if r.Method == "OPTIONS" {
-//				w.WriteHeader(http.StatusNoContent)
-//				return
-//			}
-//			h.ServeHTTP(w, r)
-//		},
-//	)
-//}
 
 func main() {
 	absoluteJWTPrivateFile, err := filepath.Abs(jwtPrivateFile)
@@ -71,7 +55,7 @@ func main() {
 	router.HandleFunc("POST /signin", authHandlers.SignIn)
 	router.HandleFunc("GET /profile", authHandlers.GetProfile)
 	router.HandleFunc("POST /profile", authHandlers.UpdateProfile)
-	//handler := enableCORS(router)
+	router.HandleFunc("GET /user_id", authHandlers.GetUserId)
 
 	log.Println(
 		"Starting server on port", port, "with jwt private key file", absoluteJWTPrivateFile, "and jwt public key file",
