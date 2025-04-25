@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package posts;
+
+option go_package = "github.com/LeonidS635/soa/internal/pkg/services/postspb";
+
+import "google/protobuf/timestamp.proto";
+
+service PostsService {
+  rpc AddPost (AddPostRequest) returns (AddPostResponse);
+  rpc GetPost (GetPostRequest) returns (GetPostResponse);
+  rpc GetAllPosts (GetAllPostsRequest) returns (GetAllPostsResponse);
+  rpc GetAllMyPosts (GetAllMyPostsRequest) returns (GetAllMyPostsResponse);
+  rpc UpdatePost (UpdatePostRequest) returns (UpdatePostResponse);
+  rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+}
+
+message Post {
+  bool is_private = 1;
+
+  string title = 2;
+  repeated string tags = 3;
+  string text = 4;
+}
+
+message PostServiceInfo {
+  int32 post_id = 1;
+  int32 author_id = 2;
+
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message PostFullInfo {
+  Post post = 1;
+  PostServiceInfo details = 2;
+}
+
+// Add post
+
+message AddPostRequest {
+  Post post = 1;
+  int32 user_id = 2;
+}
+
+message AddPostResponse {
+  int32 post_id = 1;
+}
+
+// Get post
+
+message GetPostRequest {
+  int32 post_id = 1;
+  int32 user_id = 2;
+}
+
+message GetPostResponse {
+  PostFullInfo post = 1;
+}
+
+// Get all posts
+
+message GetAllPostsRequest {
+  int32 page = 1;
+}
+
+message GetAllPostsResponse {
+  repeated PostFullInfo posts = 1;
+}
+
+// Get all posts of one author
+
+message GetAllMyPostsRequest {
+  int32 page = 1;
+  int32 user_id = 2;
+}
+
+message GetAllMyPostsResponse {
+  repeated PostFullInfo posts = 1;
+}
+
+// Update post
+
+message UpdatePostRequest {
+  int32 post_id = 1;
+  int32 user_id = 2;
+  Post post = 3;
+}
+
+message UpdatePostResponse {}
+
+// Delete post
+
+message DeletePostRequest {
+  int32 post_id = 1;
+  int32 user_id = 2;
+}
+
+message DeletePostResponse {}
