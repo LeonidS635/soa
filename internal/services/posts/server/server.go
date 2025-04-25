@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/LeonidS635/soa/internal/kafka/producer"
 	"github.com/LeonidS635/soa/internal/pkg/services/postspb"
 	"github.com/LeonidS635/soa/internal/services/posts/server/handlers"
 	"github.com/LeonidS635/soa/internal/services/posts/storage"
@@ -18,6 +19,9 @@ const (
 	connString = "postgres://postgres:postgres@posts_postgres_db:5432/postgres?sslmode=disable"
 
 	port = 8083
+
+	kafkaConnString = "kafka:9092"
+	kafkaTopic      = "posts-views"
 )
 
 func main() {
@@ -32,7 +36,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	userUseCase := usecase.NewPostsUseCase(postsStorage)
+
+	eventsProducer := producer.NewProducer(kafkaConnString, kafkaTopic)
+
+	userUseCase := usecase.NewPostsUseCase(postsStorage, eventsProducer)
 	postsHandlers := handlers.NewPostsHandlers(userUseCase)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
