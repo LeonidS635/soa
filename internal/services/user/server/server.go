@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/LeonidS635/soa/internal/kafka/producer"
 	"github.com/LeonidS635/soa/internal/services/user/server/handlers"
 	"github.com/LeonidS635/soa/internal/services/user/storage"
 	"github.com/LeonidS635/soa/internal/services/user/usecase"
@@ -20,6 +21,9 @@ const (
 	connString = "postgres://postgres:postgres@users_postgres_db:5432/postgres?sslmode=disable"
 
 	port = 8082
+
+	kafkaConnString = "kafka:9092"
+	kafkaTopic      = "users-registration"
 )
 
 func main() {
@@ -44,7 +48,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	userUseCase := usecase.NewUserUseCase(userStorage)
+
+	eventsProducer := producer.NewProducer(kafkaConnString, kafkaTopic)
+
+	userUseCase := usecase.NewUserUseCase(userStorage, eventsProducer)
 	authHandlers, err := handlers.NewUserHandlers(userUseCase, absoluteJWTPrivateFile, absoluteJWTPublicFile)
 	if err != nil {
 		log.Fatalln(err)

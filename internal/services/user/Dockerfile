@@ -6,6 +6,7 @@ COPY go.* .
 RUN go mod download
 
 COPY internal/services/user ./internal/services/user/
+COPY internal/kafka ./internal/kafka
 
 RUN go build -o user-service ./internal/services/user/server/server.go
 
