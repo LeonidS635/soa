@@ -14,12 +14,12 @@ func (pg *PgPostsStorageImpl) GetPost(ctx context.Context, postId, userId int32)
 		return nil, err
 	}
 
-	post := &dto.Post{}
+	post := dto.Post{}
 	err = pg.db.QueryRow(
 		ctx,
 		`SELECT is_private, title, tags, text FROM posts WHERE post_id = $1`,
 		postId,
-	).Scan(post.IsPrivate, post.Title, post.Tags, post.Text)
+	).Scan(&post.IsPrivate, &post.Title, &post.Tags, &post.Text)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			err = PostNotFoundError
@@ -32,7 +32,7 @@ func (pg *PgPostsStorageImpl) GetPost(ctx context.Context, postId, userId int32)
 	}
 
 	return &dto.PostFullInfo{
-		Post:            post,
+		Post:            &post,
 		PostServiceInfo: postServiceInfo,
 	}, err
 }

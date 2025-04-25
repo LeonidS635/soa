@@ -7,10 +7,10 @@ import (
 	"github.com/LeonidS635/soa/internal/services/posts/dto/converters"
 )
 
-func (h *PostsHandlers) GetAllPosts(ctx context.Context, req *postspb.GetAllPostsRequest) (
-	*postspb.GetAllPostsResponse, error,
-) {
-	posts, err := h.useCase.GetAllPosts(req.GetPage(), postsPerPageN)
+func (h *PostsHandlers) GetAllMyPosts(
+	ctx context.Context, req *postspb.GetAllMyPostsRequest,
+) (*postspb.GetAllMyPostsResponse, error) {
+	posts, err := h.useCase.GetAllMyPosts(req.GetPage(), postsPerPageN, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
@@ -20,5 +20,5 @@ func (h *PostsHandlers) GetAllPosts(ctx context.Context, req *postspb.GetAllPost
 		pbPosts[i] = converters.PostFullInfoToPB(posts[i])
 	}
 
-	return &postspb.GetAllPostsResponse{Posts: pbPosts}, nil
+	return &postspb.GetAllMyPostsResponse{Posts: pbPosts}, nil
 }

@@ -9,27 +9,28 @@ import (
 )
 
 func (pg *PgPostsStorageImpl) GetAllPosts(
-	ctx context.Context, postsPerPageN, userId int32, onlyAuthor bool,
-) ([][]*dto.PostFullInfo, error) {
+	ctx context.Context, page, postsPerPageN, userId int32, onlyAuthor bool,
+) ([]*dto.PostFullInfo, error) {
 	rows, err := pg.db.Query(
 		ctx,
-		`SELECT post_id, created_at, updated_at FROM posts_info WHERE author_id = $1`,
-		userId,
+		`SELECT post_id, author_id, created_at, updated_at FROM posts_info
+        WHERE NOT $1 OR author_id = $2
+        ORDER BY updated_at DESC
+        LIMIT $3 OFFSET $4`,
+		onlyAuthor, userId, postsPerPageN, (page-1)*postsPerPageN,
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var posts [][]*dto.PostFullInfo
-	for pagesCounter, postsCounter := int32(0), int32(0); rows.Next(); postsCounter++ {
-		if postsCounter == postsPerPageN-1 {
-			postsCounter = 0
-			pagesCounter++
+	posts := make([]*dto.PostFullInfo, 0, postsPerPageN)
+	for postsCounter := 0; rows.Next(); postsCounter++ {
+		post := dto.PostFullInfo{
+			Post:            &dto.Post{},
+			PostServiceInfo: &dto.PostServiceInfo{},
 		}
-
-		post := &dto.PostFullInfo{}
-		if err = rows.Scan(post.PostId, post.CreatedAt, post.UpdatedAt); err != nil {
+		if err = rows.Scan(&post.PostId, &post.AuthorId, &post.CreatedAt, &post.UpdatedAt); err != nil {
 			return nil, err
 		}
 
@@ -37,7 +38,7 @@ func (pg *PgPostsStorageImpl) GetAllPosts(
 			ctx,
 			`SELECT is_private, title, tags, text FROM posts WHERE post_id = $1`,
 			post.PostId,
-		).Scan(post.IsPrivate, post.Title, post.Tags, post.Text)
+		).Scan(&post.IsPrivate, &post.Title, &post.Tags, &post.Text)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				err = PostNotFoundError
@@ -46,10 +47,10 @@ func (pg *PgPostsStorageImpl) GetAllPosts(
 		}
 
 		if !post.IsPrivate || !onlyAuthor || post.AuthorId != userId {
-			posts[pagesCounter] = append(posts[pagesCounter], post)
+			posts = append(posts, &post)
 		}
 	}
-	if rows.Err() != nil {
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 

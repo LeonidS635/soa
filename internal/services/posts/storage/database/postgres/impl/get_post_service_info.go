@@ -16,7 +16,7 @@ func (pg *PgPostsStorageImpl) getPostsServiceInfo(ctx context.Context, postId in
 		ctx,
 		`SELECT post_id, author_id, created_at, updated_at FROM posts_info WHERE post_id = $1`,
 		postId,
-	).Scan(postServiceInfo.PostId, postServiceInfo.AuthorId, postServiceInfo.CreatedAt, postServiceInfo.UpdatedAt)
+	).Scan(&postServiceInfo.PostId, &postServiceInfo.AuthorId, &postServiceInfo.CreatedAt, &postServiceInfo.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			err = PostNotFoundError

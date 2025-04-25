@@ -11,8 +11,8 @@ import (
 type storageImpl interface {
 	AddPost(ctx context.Context, userId int32, post *dto.Post) (int32, error)
 	GetPost(ctx context.Context, postId, userId int32) (*dto.PostFullInfo, error)
-	GetAllPosts(ctx context.Context, postsPerPageN, userId int32, onlyAuthor bool) (
-		[][]*dto.PostFullInfo, error,
+	GetAllPosts(ctx context.Context, page, postsPerPageN, userId int32, onlyAuthor bool) (
+		[]*dto.PostFullInfo, error,
 	)
 	UpdatePost(ctx context.Context, postId, userId int32, newPost *dto.Post) error
 	DeletePost(ctx context.Context, postId, userId int32) error
@@ -42,8 +42,8 @@ func (s *PostsStorage) GetPost(postId, userId int32) (*dto.PostFullInfo, error) 
 	return s.impl_.GetPost(s.ctx, postId, userId)
 }
 
-func (s *PostsStorage) GetAllPosts(postsPerPageN, userId int32, onlyAuthor bool) ([][]*dto.PostFullInfo, error) {
-	return s.impl_.GetAllPosts(s.ctx, postsPerPageN, userId, onlyAuthor)
+func (s *PostsStorage) GetAllPosts(page, postsPerPageN, userId int32, onlyAuthor bool) ([]*dto.PostFullInfo, error) {
+	return s.impl_.GetAllPosts(s.ctx, page, postsPerPageN, userId, onlyAuthor)
 }
 
 func (s *PostsStorage) UpdatePost(postId, userId int32, newPost *dto.Post) error {

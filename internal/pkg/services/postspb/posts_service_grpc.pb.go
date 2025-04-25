@@ -19,12 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PostsService_AddPost_FullMethodName                = "/posts.PostsService/AddPost"
-	PostsService_GetPost_FullMethodName                = "/posts.PostsService/GetPost"
-	PostsService_GetAllPosts_FullMethodName            = "/posts.PostsService/GetAllPosts"
-	PostsService_GetAllPostsOfOneAuthor_FullMethodName = "/posts.PostsService/GetAllPostsOfOneAuthor"
-	PostsService_UpdatePost_FullMethodName             = "/posts.PostsService/UpdatePost"
-	PostsService_DeletePost_FullMethodName             = "/posts.PostsService/DeletePost"
+	PostsService_AddPost_FullMethodName       = "/posts.PostsService/AddPost"
+	PostsService_GetPost_FullMethodName       = "/posts.PostsService/GetPost"
+	PostsService_GetAllPosts_FullMethodName   = "/posts.PostsService/GetAllPosts"
+	PostsService_GetAllMyPosts_FullMethodName = "/posts.PostsService/GetAllMyPosts"
+	PostsService_UpdatePost_FullMethodName    = "/posts.PostsService/UpdatePost"
+	PostsService_DeletePost_FullMethodName    = "/posts.PostsService/DeletePost"
 )
 
 // PostsServiceClient is the client API for PostsService service.
@@ -34,7 +34,7 @@ type PostsServiceClient interface {
 	AddPost(ctx context.Context, in *AddPostRequest, opts ...grpc.CallOption) (*AddPostResponse, error)
 	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
 	GetAllPosts(ctx context.Context, in *GetAllPostsRequest, opts ...grpc.CallOption) (*GetAllPostsResponse, error)
-	GetAllPostsOfOneAuthor(ctx context.Context, in *GetAllPostsOfOneAuthorRequest, opts ...grpc.CallOption) (*GetAllPostsOfOneAuthorResponse, error)
+	GetAllMyPosts(ctx context.Context, in *GetAllMyPostsRequest, opts ...grpc.CallOption) (*GetAllMyPostsResponse, error)
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
 }
@@ -77,10 +77,10 @@ func (c *postsServiceClient) GetAllPosts(ctx context.Context, in *GetAllPostsReq
 	return out, nil
 }
 
-func (c *postsServiceClient) GetAllPostsOfOneAuthor(ctx context.Context, in *GetAllPostsOfOneAuthorRequest, opts ...grpc.CallOption) (*GetAllPostsOfOneAuthorResponse, error) {
+func (c *postsServiceClient) GetAllMyPosts(ctx context.Context, in *GetAllMyPostsRequest, opts ...grpc.CallOption) (*GetAllMyPostsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetAllPostsOfOneAuthorResponse)
-	err := c.cc.Invoke(ctx, PostsService_GetAllPostsOfOneAuthor_FullMethodName, in, out, cOpts...)
+	out := new(GetAllMyPostsResponse)
+	err := c.cc.Invoke(ctx, PostsService_GetAllMyPosts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ type PostsServiceServer interface {
 	AddPost(context.Context, *AddPostRequest) (*AddPostResponse, error)
 	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
 	GetAllPosts(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error)
-	GetAllPostsOfOneAuthor(context.Context, *GetAllPostsOfOneAuthorRequest) (*GetAllPostsOfOneAuthorResponse, error)
+	GetAllMyPosts(context.Context, *GetAllMyPostsRequest) (*GetAllMyPostsResponse, error)
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
 	mustEmbedUnimplementedPostsServiceServer()
@@ -136,8 +136,8 @@ func (UnimplementedPostsServiceServer) GetPost(context.Context, *GetPostRequest)
 func (UnimplementedPostsServiceServer) GetAllPosts(context.Context, *GetAllPostsRequest) (*GetAllPostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllPosts not implemented")
 }
-func (UnimplementedPostsServiceServer) GetAllPostsOfOneAuthor(context.Context, *GetAllPostsOfOneAuthorRequest) (*GetAllPostsOfOneAuthorResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllPostsOfOneAuthor not implemented")
+func (UnimplementedPostsServiceServer) GetAllMyPosts(context.Context, *GetAllMyPostsRequest) (*GetAllMyPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllMyPosts not implemented")
 }
 func (UnimplementedPostsServiceServer) UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
@@ -220,20 +220,20 @@ func _PostsService_GetAllPosts_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostsService_GetAllPostsOfOneAuthor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllPostsOfOneAuthorRequest)
+func _PostsService_GetAllMyPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllMyPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostsServiceServer).GetAllPostsOfOneAuthor(ctx, in)
+		return srv.(PostsServiceServer).GetAllMyPosts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PostsService_GetAllPostsOfOneAuthor_FullMethodName,
+		FullMethod: PostsService_GetAllMyPosts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostsServiceServer).GetAllPostsOfOneAuthor(ctx, req.(*GetAllPostsOfOneAuthorRequest))
+		return srv.(PostsServiceServer).GetAllMyPosts(ctx, req.(*GetAllMyPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -294,8 +294,8 @@ var PostsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostsService_GetAllPosts_Handler,
 		},
 		{
-			MethodName: "GetAllPostsOfOneAuthor",
-			Handler:    _PostsService_GetAllPostsOfOneAuthor_Handler,
+			MethodName: "GetAllMyPosts",
+			Handler:    _PostsService_GetAllMyPosts_Handler,
 		},
 		{
 			MethodName: "UpdatePost",

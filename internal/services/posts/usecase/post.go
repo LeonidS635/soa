@@ -7,8 +7,8 @@ import (
 type postsStorage interface {
 	AddPost(userId int32, post *dto.Post) (int32, error)
 	GetPost(postId, userId int32) (*dto.PostFullInfo, error)
-	GetAllPosts(postsPerPageN, userId int32, onlyAuthor bool) (
-		[][]*dto.PostFullInfo, error,
+	GetAllPosts(page, postsPerPageN, userId int32, onlyAuthor bool) (
+		[]*dto.PostFullInfo, error,
 	)
 	UpdatePost(postId, userId int32, newPost *dto.Post) error
 	DeletePost(postId, userId int32) error

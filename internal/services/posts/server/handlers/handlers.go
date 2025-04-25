@@ -5,6 +5,8 @@ import (
 	"github.com/LeonidS635/soa/internal/services/posts/usecase"
 )
 
+const postsPerPageN = int32(10)
+
 type PostsHandlers struct {
 	useCase *usecase.PostsUseCase
 	postspb.UnimplementedPostsServiceServer

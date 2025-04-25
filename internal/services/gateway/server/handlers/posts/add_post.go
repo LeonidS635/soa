@@ -23,8 +23,9 @@ func (h *GateWayPostsHandlers) AddPost(w http.ResponseWriter, r *http.Request) {
 
 	addPostRequest := postspb.AddPostRequest{
 		UserId: userId,
+		Post:   &postspb.Post{},
 	}
-	err = protojson.Unmarshal(body, &addPostRequest)
+	err = protojson.Unmarshal(body, addPostRequest.Post)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("add post: error unmarshalling body: %v", err), http.StatusBadRequest)
 		return

@@ -3,9 +3,9 @@ package posts
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/LeonidS635/soa/internal/pkg/services/postspb"
-	"github.com/LeonidS635/soa/internal/services/gateway/server/handlers/helpers"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -15,21 +15,17 @@ func (h *GateWayPostsHandlers) DeletePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	body, err := helpers.ReadBodyFromRequest(r)
+	postIdStr := r.PathValue("id")
+	postId, err := strconv.ParseInt(postIdStr, 10, 32)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("delete post: %v", err), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("get post: error parsing post_id: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	deletePostRequest := postspb.DeletePostRequest{
 		UserId: userId,
+		PostId: int32(postId),
 	}
-	err = protojson.Unmarshal(body, &deletePostRequest)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("delete post: error unmarshalling body: %v", err), http.StatusBadRequest)
-		return
-	}
-
 	deletePostResp, err := h.postsServiceClient.DeletePost(r.Context(), &deletePostRequest)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("delete post: %v", err), http.StatusInternalServerError)

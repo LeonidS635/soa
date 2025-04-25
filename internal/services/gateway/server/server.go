@@ -13,7 +13,7 @@ const (
 	port = 8081
 
 	userServiceURL   = "http://user_service:8082"
-	postsServiceHost = "localhost:8083"
+	postsServiceHost = "posts_service:8083"
 )
 
 func enableCORS(h *http.ServeMux) http.Handler {
@@ -46,12 +46,12 @@ func main() {
 	router.HandleFunc("GET /profile", userHandlers.Proxy)
 	router.HandleFunc("POST /profile", userHandlers.Proxy)
 
-	router.HandleFunc("POST /posts/add", postsServiceHandlers.AddPost)
-	router.HandleFunc("GET /posts/get", postsServiceHandlers.GetPost)
-	router.HandleFunc("GET /posts/get_all", postsServiceHandlers.GetAllPosts)
-	router.HandleFunc("GET /posts/get_all_of_author", postsServiceHandlers.GetAllPostsOfOneAuthor)
-	router.HandleFunc("POST /posts/update", postsServiceHandlers.UpdatePost)
-	router.HandleFunc("GET /posts/delete", postsServiceHandlers.DeletePost)
+	router.HandleFunc("POST /posts", postsServiceHandlers.AddPost)
+	router.HandleFunc("GET /posts/{id}", postsServiceHandlers.GetPost)
+	router.HandleFunc("GET /posts/all", postsServiceHandlers.GetAllPosts)
+	router.HandleFunc("GET /posts/all-mine", postsServiceHandlers.GetAllMyPosts)
+	router.HandleFunc("POST /posts/{id}", postsServiceHandlers.UpdatePost)
+	router.HandleFunc("DELETE /posts/{id}", postsServiceHandlers.DeletePost)
 
 	handler := enableCORS(router)
 

@@ -182,7 +182,7 @@ paths:
         "500":
           description: Ошибка на стороне сервера
 
-  /posts/add:
+  /posts:
     post:
       summary: Публикация поста
       description: Публикует пост от имени пользователя
@@ -208,11 +208,252 @@ paths:
                   example: ["tag 1", "tag 2", "tag 3"]
                 text:
                   type: string
-                  format: email
                   example: "some very interesting text"
       responses:
         "200":
           description: Пост успешно опубликован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post_id:
+                    type: integer
+                    example: 123
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: ID поста
+        schema:
+          type: integer
+          example: 123
+
+    get:
+      summary: Получение поста
+      description: Возвращает данные поста
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "200":
+          description: Данные поста успешно переданы
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post_id:
+                    type: integer
+                    example: 123
+                  user_id:
+                    type: integer
+                    example: 456
+                  is_private:
+                    type: boolean
+                    example: false
+                  title:
+                    type: string
+                    example: "New post"
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example: [ "tag 1", "tag 2", "tag 3" ]
+                  text:
+                    type: string
+                    example: "some very interesting text"
+                  created_at:
+                    type: string
+                    format: date
+                    example: "2025-04-01T15:04:05Z"
+                  updated_at:
+                    type: string
+                    format: date
+                    example: "2025-04-01T21:14:34Z"
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+    post:
+      summary: Редактирование поста
+      description: Обновляет данные поста
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_private:
+                  type: boolean
+                  example: false
+                title:
+                  type: string
+                  example: "New post"
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: [ "tag 1", "tag 2", "tag 3" ]
+                text:
+                  type: string
+                  example: "some very interesting text"
+      responses:
+        "200":
+          description: Пост успешно обновлён
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+    delete:
+      summary: Удаление поста
+      description: Удаляет данные поста
+      security:
+        - cookieAuth: [ ]
+      responses:
+        "200":
+          description: Пост успешно удалён
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/all:
+    get:
+      summary: Получение всех постов
+      description: Возвращает данные всех постов в виде пагинированного списка
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          description: Номер запрашиваемой страницы
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Данные постов успешно переданы
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: integer
+                      example: 123
+                    user_id:
+                      type: integer
+                      example: 456
+                    is_private:
+                      type: boolean
+                      example: false
+                    title:
+                      type: string
+                      example: "New post"
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                      example: [ "tag 1", "tag 2", "tag 3" ]
+                    text:
+                      type: string
+                      example: "some very interesting text"
+                    created_at:
+                      type: string
+                      format: date
+                      example: "2025-04-01T15:04:05Z"
+                    updated_at:
+                      type: string
+                      format: date
+                      example: "2025-04-01T21:14:34Z"
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/all-mine:
+    get:
+      summary: Получение всех своих постов
+      description: Возвращает данные всех постов одного автора в виде пагинированного списка
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          description: Номер запрашиваемой страницы
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Данные постов успешно переданы
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    post_id:
+                      type: integer
+                      example: 123
+                    user_id:
+                      type: integer
+                      example: 456
+                    is_private:
+                      type: boolean
+                      example: false
+                    title:
+                      type: string
+                      example: "New post"
+                    tags:
+                      type: array
+                      items:
+                        type: string
+                      example: [ "tag 1", "tag 2", "tag 3" ]
+                    text:
+                      type: string
+                      example: "some very interesting text"
+                    created_at:
+                      type: string
+                      format: date
+                      example: "2025-04-01T15:04:05Z"
+                    updated_at:
+                      type: string
+                      format: date
+                      example: "2025-04-01T21:14:34Z"
         "400":
           description: JWT-токен отсутствует или невалиден, неверные данные профиля
         "401":

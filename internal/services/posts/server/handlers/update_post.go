@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/LeonidS635/soa/internal/pkg/services/postspb"
-	"github.com/LeonidS635/soa/internal/services/posts/server/handlers/converters"
+	"github.com/LeonidS635/soa/internal/services/posts/dto/converters"
 )
 
 func (h *PostsHandlers) UpdatePost(ctx context.Context, req *postspb.UpdatePostRequest) (

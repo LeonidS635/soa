@@ -1,8 +1,12 @@
 package posts
 
 import (
-	"encoding/binary"
+	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
+
+	"github.com/LeonidS635/soa/internal/services/gateway/server/handlers/helpers"
 )
 
 func (h *GateWayPostsHandlers) getUserId(w http.ResponseWriter, r *http.Request) (int32, error) {
@@ -17,20 +21,31 @@ func (h *GateWayPostsHandlers) getUserId(w http.ResponseWriter, r *http.Request)
 			req.Header.Add(name, value)
 		}
 	}
-	req.ContentLength = r.ContentLength
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+		return -1, errors.New("error getting user id")
+	}
 
-	var userId int32
-	err = binary.Read(resp.Body, binary.LittleEndian, &userId)
+	data, err := helpers.ReadBodyFromResponse(resp)
 	if err != nil {
-		http.Error(w, "Error reading body: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "get user id: error reading response body: "+err.Error(), http.StatusInternalServerError)
 		return -1, err
 	}
 
-	return userId, nil
+	responseStruct := struct {
+		UserId int `json:"user_id"`
+	}{}
+	err = json.Unmarshal(data, &responseStruct)
+	if err != nil {
+		http.Error(w, "get user id: error unmarshalling response body: "+err.Error(), http.StatusInternalServerError)
+	}
+
+	return int32(responseStruct.UserId), nil
 }

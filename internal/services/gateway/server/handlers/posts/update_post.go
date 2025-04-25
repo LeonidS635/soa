@@ -3,6 +3,7 @@ package posts
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/LeonidS635/soa/internal/pkg/services/postspb"
 	"github.com/LeonidS635/soa/internal/services/gateway/server/handlers/helpers"
@@ -15,6 +16,13 @@ func (h *GateWayPostsHandlers) UpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	postIdStr := r.PathValue("id")
+	postId, err := strconv.ParseInt(postIdStr, 10, 32)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("get post: error parsing post_id: %v", err), http.StatusBadRequest)
+		return
+	}
+
 	body, err := helpers.ReadBodyFromRequest(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("update post: %v", err), http.StatusBadRequest)
@@ -23,8 +31,10 @@ func (h *GateWayPostsHandlers) UpdatePost(w http.ResponseWriter, r *http.Request
 
 	updatePostRequest := postspb.UpdatePostRequest{
 		UserId: userId,
+		PostId: int32(postId),
+		Post:   &postspb.Post{},
 	}
-	err = protojson.Unmarshal(body, &updatePostRequest)
+	err = protojson.Unmarshal(body, updatePostRequest.Post)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("update post: error unmarshalling body: %v", err), http.StatusBadRequest)
 		return
