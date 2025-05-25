@@ -3,6 +3,7 @@ package producer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/LeonidS635/soa/internal/kafka/events"
 	"github.com/google/uuid"
@@ -10,19 +11,29 @@ import (
 )
 
 type KafkaProducer struct {
-	kafka.Writer
+	connString string
+	producers  map[string]*kafka.Writer
 }
 
-func NewProducer(connString, topic string) *KafkaProducer {
+func NewProducer(connString string) *KafkaProducer {
 	return &KafkaProducer{
-		Writer: kafka.Writer{
-			Addr:  kafka.TCP(connString),
-			Topic: topic,
-		},
+		connString: connString,
+		producers:  make(map[string]*kafka.Writer),
 	}
 }
 
-func (p *KafkaProducer) Publish(ctx context.Context, event events.Event) error {
+func (p *KafkaProducer) RegisterTopic(topic string) {
+	p.producers[topic] = &kafka.Writer{
+		Addr:  kafka.TCP(p.connString),
+		Topic: topic,
+	}
+}
+
+func (p *KafkaProducer) Publish(ctx context.Context, topic string, event events.Event) error {
+	if _, ok := p.producers[topic]; !ok {
+		return fmt.Errorf("error publishing event: unknown topic %q", topic)
+	}
+
 	key, err := uuid.New().MarshalBinary()
 	if err != nil {
 		return err
@@ -33,7 +44,7 @@ func (p *KafkaProducer) Publish(ctx context.Context, event events.Event) error {
 		return err
 	}
 
-	return p.WriteMessages(
+	return p.producers[topic].WriteMessages(
 		ctx, kafka.Message{
 			Key:   key,
 			Value: value,
@@ -41,6 +52,19 @@ func (p *KafkaProducer) Publish(ctx context.Context, event events.Event) error {
 	)
 }
 
-func (p *KafkaProducer) Close() error {
-	return p.Writer.Close()
+func (p *KafkaProducer) Close(topic string) error {
+	if producer, ok := p.producers[topic]; ok {
+		return producer.Close()
+	}
+	return fmt.Errorf("error closing producer: unknown topic %q", topic)
+}
+
+func (p *KafkaProducer) CloseAll() error {
+	var err error
+	for _, producer := range p.producers {
+		if closeErr := producer.Close(); closeErr != nil {
+			err = closeErr
+		}
+	}
+	return err
 }

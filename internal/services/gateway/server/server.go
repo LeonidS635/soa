@@ -53,6 +53,9 @@ func main() {
 	router.HandleFunc("POST /posts/{id}", postsServiceHandlers.UpdatePost)
 	router.HandleFunc("DELETE /posts/{id}", postsServiceHandlers.DeletePost)
 
+	router.HandleFunc("POST /posts/{id}/comment", postsServiceHandlers.CommentPost)
+	router.HandleFunc("POST /posts/{id}/like", postsServiceHandlers.LikePost)
+
 	handler := enableCORS(router)
 
 	log.Println("Starting proxy-server on port", port)

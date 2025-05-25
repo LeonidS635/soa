@@ -17,6 +17,7 @@ func (h *GateWayUserHandlers) Proxy(w http.ResponseWriter, r *http.Request) {
 			proxyReq.Header.Add(name, value)
 		}
 	}
+	proxyReq.ContentLength = r.ContentLength
 
 	resp, err := http.DefaultClient.Do(proxyReq)
 	if err != nil {

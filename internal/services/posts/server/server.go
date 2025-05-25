@@ -20,8 +20,10 @@ const (
 
 	port = 8083
 
-	kafkaConnString = "kafka:9092"
-	kafkaTopic      = "posts-views"
+	kafkaConnString         = "kafka:9092"
+	kafkaPostsViewsTopic    = "posts-views"
+	kafkaPostsLikesTopic    = "posts-likes"
+	kafkaPostsCommentsTopic = "posts-comments"
 )
 
 func main() {
@@ -37,10 +39,13 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	eventsProducer := producer.NewProducer(kafkaConnString, kafkaTopic)
+	eventsProducer := producer.NewProducer(kafkaConnString)
+	eventsProducer.RegisterTopic(kafkaPostsViewsTopic)
+	eventsProducer.RegisterTopic(kafkaPostsLikesTopic)
+	eventsProducer.RegisterTopic(kafkaPostsCommentsTopic)
 
-	userUseCase := usecase.NewPostsUseCase(postsStorage, eventsProducer)
-	postsHandlers := handlers.NewPostsHandlers(userUseCase)
+	postsUseCase := usecase.NewPostsUseCase(postsStorage, eventsProducer)
+	postsHandlers := handlers.NewPostsHandlers(postsUseCase)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

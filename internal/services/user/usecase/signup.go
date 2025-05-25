@@ -21,11 +21,8 @@ func (uc *UserUseCase) SignUp(credentials *dto.RegistrationData) (int, error) {
 		return -1, err
 	}
 
-	event, err := events.UserRegistered(int32(userId))
-	if err != nil {
-		return -1, err
-	}
-	if err = uc.eventsProducer.Publish(context.TODO(), event); err != nil {
+	event := events.UserRegistered(int32(userId))
+	if err = uc.eventsProducer.Publish(context.TODO(), "users-registrations", event); err != nil {
 		return -1, err
 	}
 	return userId, nil

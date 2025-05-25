@@ -13,7 +13,13 @@ service PostsService {
   rpc GetAllMyPosts (GetAllMyPostsRequest) returns (GetAllMyPostsResponse);
   rpc UpdatePost (UpdatePostRequest) returns (UpdatePostResponse);
   rpc DeletePost (DeletePostRequest) returns (DeletePostResponse);
+
+  rpc CommentPost (CommentPostRequest) returns (CommentPostResponse);
+
+  rpc LikePost (LikePostRequest) returns (LikePostResponse);
 }
+
+// Post
 
 message Post {
   bool is_private = 1;
@@ -97,3 +103,41 @@ message DeletePostRequest {
 }
 
 message DeletePostResponse {}
+
+// Comment
+
+message Comment {
+  string text = 1;
+}
+
+message CommentServiceInfo {
+  int32 post_id = 1;
+  int32 author_id = 2;
+
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message CommentFullInfo {
+  Comment comment = 1;
+  CommentServiceInfo details = 2;
+}
+
+// Comment post
+
+message CommentPostRequest {
+  int32 post_id = 1;
+  int32 user_id = 2;
+  Comment comment = 3;
+}
+
+message CommentPostResponse {}
+
+// Like post
+
+message LikePostRequest {
+  int32 post_id = 1;
+  int32 user_id = 2;
+}
+
+message LikePostResponse {}

@@ -463,6 +463,69 @@ paths:
         "500":
           description: Ошибка на стороне сервера
 
+  /posts/{id}/comment:
+    parameters:
+      - name: id
+        in: path
+        description: ID поста
+        schema:
+          type: integer
+          example: 123
+
+    post:
+      summary: Комментирование поста
+      description: Оставляет комментарий под постом
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "some comment text"
+      responses:
+        "200":
+          description: Комментарий успешно оставлен
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/{id}/like:
+    parameters:
+      - name: id
+        in: path
+        description: ID поста
+        schema:
+          type: integer
+          example: 123
+
+    post:
+      summary: Лайк поста
+      description: Оставляет лайк под постом
+      security:
+        - cookieAuth: [ ]
+
+      responses:
+        "200":
+          description: Лайк успешно оставлен
+        "400":
+          description: JWT-токен отсутствует или невалиден, неверные данные профиля
+        "401":
+          description: JWT-токен невалиден
+        "403":
+          description: Доступ запрещен
+        "500":
+          description: Ошибка на стороне сервера
+
 components:
   securitySchemes:
     cookieAuth:
