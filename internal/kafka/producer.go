@@ -1,8 +1,7 @@
-package producer
+package kafka
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/LeonidS635/soa/internal/kafka/events"
@@ -10,26 +9,26 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaProducer struct {
+type Producer struct {
 	connString string
 	producers  map[string]*kafka.Writer
 }
 
-func NewProducer(connString string) *KafkaProducer {
-	return &KafkaProducer{
+func NewProducer(connString string) *Producer {
+	return &Producer{
 		connString: connString,
 		producers:  make(map[string]*kafka.Writer),
 	}
 }
 
-func (p *KafkaProducer) RegisterTopic(topic string) {
+func (p *Producer) RegisterTopic(topic string) {
 	p.producers[topic] = &kafka.Writer{
 		Addr:  kafka.TCP(p.connString),
 		Topic: topic,
 	}
 }
 
-func (p *KafkaProducer) Publish(ctx context.Context, topic string, event events.Event) error {
+func (p *Producer) Publish(ctx context.Context, topic string, event events.Event) error {
 	if _, ok := p.producers[topic]; !ok {
 		return fmt.Errorf("error publishing event: unknown topic %q", topic)
 	}
@@ -39,7 +38,7 @@ func (p *KafkaProducer) Publish(ctx context.Context, topic string, event events.
 		return err
 	}
 
-	value, err := json.Marshal(event)
+	value, err := event.Marshal()
 	if err != nil {
 		return err
 	}
@@ -52,14 +51,14 @@ func (p *KafkaProducer) Publish(ctx context.Context, topic string, event events.
 	)
 }
 
-func (p *KafkaProducer) Close(topic string) error {
+func (p *Producer) Close(topic string) error {
 	if producer, ok := p.producers[topic]; ok {
 		return producer.Close()
 	}
 	return fmt.Errorf("error closing producer: unknown topic %q", topic)
 }
 
-func (p *KafkaProducer) CloseAll() error {
+func (p *Producer) CloseAll() error {
 	var err error
 	for _, producer := range p.producers {
 		if closeErr := producer.Close(); closeErr != nil {

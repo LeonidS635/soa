@@ -2,54 +2,54 @@ package storage
 
 import (
 	"context"
+	"time"
 
-	"github.com/LeonidS635/soa/internal/services/posts/dto"
-	"github.com/LeonidS635/soa/internal/services/posts/storage/database/postgres/impl"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/LeonidS635/soa/internal/services/statistics/dto"
+	"github.com/LeonidS635/soa/internal/services/statistics/storage/database/clickhouse/impl"
 )
 
 type storageImpl interface {
-	AddPost(ctx context.Context, userId int32, post *dto.Post) (int32, error)
-	GetPost(ctx context.Context, postId, userId int32) (*dto.PostFullInfo, error)
-	GetAllPosts(ctx context.Context, page, postsPerPageN, userId int32, onlyAuthor bool) (
-		[]*dto.PostFullInfo, error,
-	)
-	UpdatePost(ctx context.Context, postId, userId int32, newPost *dto.Post) error
-	DeletePost(ctx context.Context, postId, userId int32) error
+	AddEvent(ctx context.Context, postID, userID int32, date time.Time, eventType int32) error
+
+	GetPostStats(ctx context.Context, postID int32) (dto.PostStats, error)
+	GetPostDynamics(ctx context.Context, postID, by int32) (dto.PostDynamics, error)
+	GetTop(ctx context.Context, postOrAuthor, by int32) (dto.Top, error)
 
 	Close()
 }
 
-type PostsStorage struct {
-	ctx   context.Context
+type StatisticsStorage struct {
 	impl_ storageImpl
 }
 
-func NewPostsStorage(ctx context.Context, pool *pgxpool.Pool) (*PostsStorage, error) {
-	storage, err := impl.NewPgPostsStorageImpl(pool)
+func NewStatisticsStorage(conn driver.Conn) (*StatisticsStorage, error) {
+	storage, err := impl.NewClickHouseStatisticsStorageImpl(conn)
 	if err != nil {
 		return nil, err
 	}
 
-	return &PostsStorage{ctx, storage}, nil
+	return &StatisticsStorage{storage}, nil
 }
 
-func (s *PostsStorage) AddPost(userId int32, post *dto.Post) (int32, error) {
-	return s.impl_.AddPost(s.ctx, userId, post)
+func (s StatisticsStorage) AddEvent(ctx context.Context, postID, userID int32, date time.Time, eventType int32) error {
+	return s.impl_.AddEvent(ctx, postID, userID, date, eventType)
 }
 
-func (s *PostsStorage) GetPost(postId, userId int32) (*dto.PostFullInfo, error) {
-	return s.impl_.GetPost(s.ctx, postId, userId)
+func (s StatisticsStorage) GetPostStats(ctx context.Context, postID int32) (dto.PostStats, error) {
+	return s.impl_.GetPostStats(ctx, postID)
 }
 
-func (s *PostsStorage) GetAllPosts(page, postsPerPageN, userId int32, onlyAuthor bool) ([]*dto.PostFullInfo, error) {
-	return s.impl_.GetAllPosts(s.ctx, page, postsPerPageN, userId, onlyAuthor)
+func (s StatisticsStorage) GetPostDynamics(ctx context.Context, postID, by int32) (
+	dto.PostDynamics, error,
+) {
+	return s.impl_.GetPostDynamics(ctx, postID, by)
 }
 
-func (s *PostsStorage) UpdatePost(postId, userId int32, newPost *dto.Post) error {
-	return s.impl_.UpdatePost(s.ctx, postId, userId, newPost)
+func (s StatisticsStorage) GetTopPosts(ctx context.Context, by int32) (dto.Top, error) {
+	return s.impl_.GetTop(ctx, impl.TopPosts, by)
 }
 
-func (s *PostsStorage) DeletePost(postId, userId int32) error {
-	return s.impl_.DeletePost(s.ctx, postId, userId)
+func (s StatisticsStorage) GetTopUsers(ctx context.Context, by int32) (dto.Top, error) {
+	return s.impl_.GetTop(ctx, impl.TopAuthors, by)
 }

@@ -2,6 +2,7 @@
 
 # postgres volume
 pgdata*
+clickhouse_data
 
 # RSA signatures for JWT
 *.pem

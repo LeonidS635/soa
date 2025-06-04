@@ -16,3 +16,8 @@ protogen-posts:
 	protoc --go_out=./internal/pkg/services/postspb --go_opt=paths=source_relative \
 		--go-grpc_out=./internal/pkg/services/postspb --go-grpc_opt=paths=source_relative \
 		-I ./internal/services/posts/api posts_service.proto
+
+protogen-stats:
+	protoc --go_out=./internal/pkg/services/statspb --go_opt=paths=source_relative \
+		--go-grpc_out=./internal/pkg/services/statspb --go-grpc_opt=paths=source_relative \
+		-I ./internal/services/statistics/api stats_service.proto
