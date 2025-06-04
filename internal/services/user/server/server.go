@@ -22,8 +22,8 @@ const (
 
 	port = 8082
 
-	kafkaConnString = "kafka:9092"
-	kafkaTopic      = "users-registration"
+	kafkaConnString              = "kafka:9092"
+	kafkaUsersRegistrationsTopic = "users-registrations"
 )
 
 func main() {
@@ -49,7 +49,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	eventsProducer := producer.NewProducer(kafkaConnString, kafkaTopic)
+	eventsProducer := producer.NewProducer(kafkaConnString)
+	eventsProducer.RegisterTopic(kafkaUsersRegistrationsTopic)
 
 	userUseCase := usecase.NewUserUseCase(userStorage, eventsProducer)
 	authHandlers, err := handlers.NewUserHandlers(userUseCase, absoluteJWTPrivateFile, absoluteJWTPublicFile)

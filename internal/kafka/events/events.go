@@ -1,7 +1,6 @@
 package events
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -9,22 +8,17 @@ type EventType int
 
 type Event struct {
 	Moment time.Time `json:"moment"`
-	Data   []byte    `json:"data"`
+	Data   any       `json:"data"`
 }
 
-func createEvent(data any) (Event, error) {
-	dataBytes, err := json.Marshal(data)
-	if err != nil {
-		return Event{}, err
-	}
-
+func createEvent(data any) Event {
 	return Event{
 		Moment: time.Now(),
-		Data:   dataBytes,
-	}, nil
+		Data:   data,
+	}
 }
 
-func UserRegistered(userID int32) (Event, error) {
+func UserRegistered(userID int32) Event {
 	return createEvent(
 		struct {
 			UserID int32 `json:"user_id"`
@@ -34,7 +28,31 @@ func UserRegistered(userID int32) (Event, error) {
 	)
 }
 
-func PostViewed(userID, postID int32) (Event, error) {
+func PostViewed(userID, postID int32) Event {
+	return createEvent(
+		struct {
+			UserID int32 `json:"user_id"`
+			PostID int32 `json:"post_id"`
+		}{
+			UserID: userID,
+			PostID: postID,
+		},
+	)
+}
+
+func PostLiked(userID, postID int32) Event {
+	return createEvent(
+		struct {
+			UserID int32 `json:"user_id"`
+			PostID int32 `json:"post_id"`
+		}{
+			UserID: userID,
+			PostID: postID,
+		},
+	)
+}
+
+func PostCommented(userID, postID int32) Event {
 	return createEvent(
 		struct {
 			UserID int32 `json:"user_id"`

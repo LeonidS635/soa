@@ -13,11 +13,8 @@ func (uc *PostsUseCase) GetPost(postId, userId int32) (*dto.PostFullInfo, error)
 		return nil, err
 	}
 
-	event, err := events.PostViewed(userId, postId)
-	if err != nil {
-		return nil, err
-	}
-	if err = uc.eventsProducer.Publish(context.TODO(), event); err != nil {
+	event := events.PostViewed(userId, postId)
+	if err = uc.eventsProducer.Publish(context.TODO(), "posts-views", event); err != nil {
 		return nil, err
 	}
 	return post, nil

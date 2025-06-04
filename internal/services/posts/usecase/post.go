@@ -19,7 +19,7 @@ type (
 	}
 
 	eventsProducer interface {
-		Publish(ctx context.Context, event events.Event) error
+		Publish(ctx context.Context, topic string, event events.Event) error
 	}
 )
 
