@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,7 +12,7 @@ func readBodyFromRequest(req *http.Request) ([]byte, error) {
 	read, err := req.Body.Read(body)
 	defer req.Body.Close()
 
-	if err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("%w: %w", ReadBodyError, err)
 	}
 	if read != int(req.ContentLength) {

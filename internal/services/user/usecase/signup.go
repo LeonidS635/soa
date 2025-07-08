@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/LeonidS635/soa/internal/kafka/events"
 	"github.com/LeonidS635/soa/internal/services/user/dto"
@@ -16,14 +17,17 @@ func (uc *UserUseCase) SignUp(credentials *dto.RegistrationData) (int, error) {
 
 	credentials.ChangePasswordWithHash()
 
-	userId, err := uc.storage.AddUser(credentials)
+	userID, err := uc.storage.AddUser(credentials)
 	if err != nil {
 		return -1, err
 	}
 
-	event := events.UserRegistered(int32(userId))
+	event := &events.UserRegisteredEvent{
+		Moment: time.Now(),
+		UsedID: int32(userID),
+	}
 	if err = uc.eventsProducer.Publish(context.TODO(), "users-registrations", event); err != nil {
 		return -1, err
 	}
-	return userId, nil
+	return userID, nil
 }

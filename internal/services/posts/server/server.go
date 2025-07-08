@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/LeonidS635/soa/internal/kafka/producer"
+	"github.com/LeonidS635/soa/internal/kafka"
 	"github.com/LeonidS635/soa/internal/pkg/services/postspb"
 	"github.com/LeonidS635/soa/internal/services/posts/server/handlers"
 	"github.com/LeonidS635/soa/internal/services/posts/storage"
@@ -39,7 +39,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	eventsProducer := producer.NewProducer(kafkaConnString)
+	eventsProducer := kafka.NewProducer(kafkaConnString)
 	eventsProducer.RegisterTopic(kafkaPostsViewsTopic)
 	eventsProducer.RegisterTopic(kafkaPostsLikesTopic)
 	eventsProducer.RegisterTopic(kafkaPostsCommentsTopic)

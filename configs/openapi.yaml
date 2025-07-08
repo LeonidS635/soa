@@ -526,6 +526,102 @@ paths:
         "500":
           description: Ошибка на стороне сервера
 
+  /posts/{id}/stats:
+    parameters:
+      - name: id
+        in: path
+        description: ID поста
+        schema:
+          type: integer
+          example: 123
+
+    get:
+      summary: Статистика поста
+      description: Получение количества просмотров, лайков и комментариев поста
+
+      responses:
+        "200":
+          description: Статистика успешно получена
+        "400":
+          description: Неверные данные профиля
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/{id}/dynamics:
+    parameters:
+      - in: path
+        name: id
+        description: ID поста
+        schema:
+          type: integer
+          example: 123
+
+      - in: query
+        name: metric
+        description: Желаемая метрика
+        schema:
+          type: string
+          enum:
+            - views
+            - likes
+            - comments
+
+    get:
+      summary: Динамика поста
+      description: Получение динамики количества просмотров, лайков или комментариев поста
+
+      responses:
+        "200":
+          description: Статистика успешно получена
+        "400":
+          description: Неверные данные профиля
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/top:
+    parameters:
+      - in: query
+        name: metric
+        description: Желаемая метрика
+        schema:
+          type: string
+          enum:
+            - views
+            - likes
+            - comments
+
+    get:
+      summary: Топ постов
+      description: Получение топ-10 постов по количеству просмотров, лайков или комментариев
+
+      responses:
+        "200":
+          description: Топ успешно получен
+        "500":
+          description: Ошибка на стороне сервера
+
+  /posts/top-authors:
+    parameters:
+      - in: query
+        name: metric
+        description: Желаемая метрика
+        schema:
+          type: string
+          enum:
+            - views
+            - likes
+            - comments
+
+    get:
+      summary: Топ авторов постов
+      description: Получение топ-10 авторов постов по суммарному количеству просмотров, лайков или комментариев
+
+      responses:
+        "200":
+          description: Топ успешно получен
+        "500":
+          description: Ошибка на стороне сервера
+
 components:
   securitySchemes:
     cookieAuth:

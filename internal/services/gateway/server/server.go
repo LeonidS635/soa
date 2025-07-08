@@ -6,14 +6,16 @@ import (
 	"net/http"
 
 	"github.com/LeonidS635/soa/internal/services/gateway/server/handlers/posts"
+	stats "github.com/LeonidS635/soa/internal/services/gateway/server/handlers/statistics"
 	"github.com/LeonidS635/soa/internal/services/gateway/server/handlers/user"
 )
 
 const (
 	port = 8081
 
-	userServiceURL   = "http://user_service:8082"
-	postsServiceHost = "posts_service:8083"
+	userServiceURL        = "http://user_service:8082"
+	postsServiceHost      = "posts_service:8083"
+	statisticsServiceHost = "stats_service:8084"
 )
 
 func enableCORS(h *http.ServeMux) http.Handler {
@@ -38,6 +40,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to start posts service handlers: %v", err)
 	}
+	statisticsServiceHandlers, err := stats.NewGateWayStatisticsHandlers(statisticsServiceHost)
+	if err != nil {
+		log.Fatalf("failed to start statistics service handlers: %v", err)
+	}
 
 	router := http.NewServeMux()
 
@@ -55,6 +61,11 @@ func main() {
 
 	router.HandleFunc("POST /posts/{id}/comment", postsServiceHandlers.CommentPost)
 	router.HandleFunc("POST /posts/{id}/like", postsServiceHandlers.LikePost)
+
+	router.HandleFunc("GET /posts/{id}/stats", statisticsServiceHandlers.GetPostStats)
+	router.HandleFunc("GET /posts/{id}/dynamics", statisticsServiceHandlers.GetPostDynamics)
+	router.HandleFunc("GET /posts/top", statisticsServiceHandlers.GetTopPosts)
+	router.HandleFunc("GET /posts/top-authors", statisticsServiceHandlers.GetTopUsers)
 
 	handler := enableCORS(router)
 

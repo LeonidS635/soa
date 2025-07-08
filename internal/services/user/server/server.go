@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/LeonidS635/soa/internal/kafka/producer"
+	"github.com/LeonidS635/soa/internal/kafka"
 	"github.com/LeonidS635/soa/internal/services/user/server/handlers"
 	"github.com/LeonidS635/soa/internal/services/user/storage"
 	"github.com/LeonidS635/soa/internal/services/user/usecase"
@@ -49,7 +49,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	eventsProducer := producer.NewProducer(kafkaConnString)
+	eventsProducer := kafka.NewProducer(kafkaConnString)
 	eventsProducer.RegisterTopic(kafkaUsersRegistrationsTopic)
 
 	userUseCase := usecase.NewUserUseCase(userStorage, eventsProducer)
